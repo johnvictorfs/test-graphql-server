@@ -9,9 +9,7 @@ const host = `http://localhost:${port}`;
 let testServer;
 
 beforeAll(async () => {
-  testServer = await server.start({ port }, () =>
-    console.log(`Running test server at http://localhost:${port}`)
-  );
+  testServer = await server.start({ port }, () => console.log(`Running test server at http://localhost:${port}`));
   await connectDb();
 });
 
@@ -39,26 +37,37 @@ test('Create user', async done => {
   done();
 });
 
-test('Created user was added', async done => {
+test('Created user was added to database', async done => {
   const users = await models.User.find({ email });
   expect(users).toHaveLength(1);
   done();
 });
 
-test('Created user has correct data', async done => {
+test('Created user has correct data in database', async done => {
   const user = await models.User.findOne({ email });
   expect(user.email).toEqual(email);
-  expect(user.password).not.toEqual(password);
+  expect(user.password).not.toEqual(password); // Password is encrypted
   done();
 });
 
-test('User can login', async done => {
+test('User can login with correct credentials', async done => {
   const mutation = `
     mutation {
       login(username: "${username}", password: "${password}")
     }
   `;
   const response = await request(host, mutation);
-  expect(response.login).toBeTruthy();
+  expect(response.login).toBe('true');
+  done();
+});
+
+test('User can\'t login with incorrect credentials', async done => {
+  const mutation = `
+    mutation {
+      login(username: "${username}", password: "blablabla")
+    }
+  `;
+  const response = await request(host, mutation);
+  expect(response.login).toBe('false');
   done();
 });

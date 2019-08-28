@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "NODE_ENV=development nodemon --delay 3 --exec babel-node src/app.js",
     "start": "NODE_ENV=development babel-node src/app.js",
-    "test": "NODE_ENV=test jest --verbose",
-    "ci": "start-test 'echo \"Waiting...\"' http://localhost.com/5000 test"
+    "test": "NODE_ENV=test jest --verbose"
   },
   "dependencies": {
     "@babel/cli": "^7.5.5",
@@ -37,7 +36,6 @@
     "jest-environment-node": "^24.9.0",
     "mongodb-memory-server": "^5.2.0",
     "nodemon": "^1.19.1",
-    "run-time": "^1.2.8",
-    "start-server-and-test": "^1.10.0"
+    "run-time": "^1.2.8"
   }
 }
