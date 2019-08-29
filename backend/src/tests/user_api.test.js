@@ -10,11 +10,17 @@ const host = `http://localhost:${port}`;
 let testServer;
 
 beforeAll(async () => {
+  /**
+   * Start Test GraphQL Server and Mongoose Connection (with a test in-memory Mongo Database)
+   */
   testServer = await server.start({ port }, () => console.log(`Running test server at ${host}`));
   await connectDb();
 });
 
 afterAll(async () => {
+  /**
+   * Close GraphQL Server and Mongoose connections
+   */
   await testServer.close();
   await mongoose.connection.close();
 });
@@ -39,16 +45,39 @@ test('Create user', async done => {
 });
 
 test('Created user was added to database', async done => {
-  const users = await models.User.find({ email });
+  const users = await models.User.find({ username });
   expect(users).toHaveLength(1);
   done();
 });
 
 test('Created user has correct data in database', async done => {
-  const user = await models.User.findOne({ email });
+  const user = await models.User.findOne({ username });
   expect(user.email).toEqual(email);
   expect(user.username).toEqual(username);
   expect(user.password).not.toEqual(password); // Password is encrypted
+  done();
+});
+
+test('Created user has correct data in API', async done => {
+  const user = await models.User.findOne({ username });
+
+  const query = `
+    query {
+      user(id: "${user.id}") {
+        id
+        email
+        username
+        password
+      }
+    }
+  `;
+
+  const response = await request(host, query);
+
+  expect(response.user.id).toBe(user._id.toString());
+  expect(response.user.email).toBe(user.email);
+  expect(response.user.username).toBe(user.username);
+  expect(response.user.password).toBe(user.password);
   done();
 });
 
@@ -82,7 +111,6 @@ test('Authenticated User can edit its own details', async done => {
 
   const client = new GraphQLClient(host);
   client.setHeader('Authorization', token);
-  console.log(client.options);
 
   const updateResponse = await client.request(userUpdateMutation, { email: editedEmail });
 
