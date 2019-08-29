@@ -2,8 +2,6 @@ import bcrypt from 'bcryptjs';
 import models from './models';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = 'SECRET_TOKEN';
-
 export default {
   Query: {
     userCount: () => models.User.countDocuments(),
@@ -26,7 +24,7 @@ export default {
       const user = await models.User.findOne({ username });
       const comparison = await bcrypt.compareSync(password, user.password);
 
-      if (comparison) return jwt.sign({ id: user._id, username: user.username }, JWT_SECRET);
+      if (comparison) return jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET);
       return null;
     },
     deleteUser: async (_, { id }) => {
@@ -36,7 +34,7 @@ export default {
       const auth = ctx ? ctx.request.get('Authorization') : null;
       if (!auth) return false;
 
-      const decoded = jwt.verify(auth, JWT_SECRET);
+      const decoded = jwt.verify(auth, process.env.JWT_SECRET);
       const result = await models.User.updateOne({ _id: decoded.id }, { $set: args });
 
       if (result.nModified === 1) {

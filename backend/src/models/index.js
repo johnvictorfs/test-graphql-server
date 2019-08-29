@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import User from './user';
 
-const mongo_uri = global.__MONGO_URI__ ? global.__MONGO_URI__ : 'mongodb://localhost:27017/node-test-server';
+const mongo_uri = global.__MONGO_URI__ ? global.__MONGO_URI__ : process.env.MONGO_URI;
 
 export const connectDb = () => {
   return mongoose.connect(mongo_uri, {

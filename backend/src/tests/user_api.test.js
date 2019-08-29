@@ -139,7 +139,7 @@ test('User can\'t login with incorrect credentials', async done => {
   done();
 });
 
-test('Not Authenticated User can\'t edit its own details', async done => {
+test('Unauthenticated User can\'t edit its own details', async done => {
   const mutation = `
     mutation {
       updateSelfUser(username: "some-random-username")
