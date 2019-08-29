@@ -2,15 +2,12 @@ import mongoose from 'mongoose';
 
 import User from './user';
 
-mongoose.set('useCreateIndex', true);
-
-if (global.__MONGO_URI__ === undefined) {
-  global.__MONGO_URI__ = 'mongodb://localhost:27017/node-test-server';
-}
+const mongo_uri = global.__MONGO_URI__ ? global.__MONGO_URI__ : 'mongodb://localhost:27017/node-test-server';
 
 export const connectDb = () => {
-  return mongoose.connect(global.__MONGO_URI__, {
+  return mongoose.connect(mongo_uri, {
     useNewUrlParser: true,
+    useCreateIndex: true,
     dbName: global.__MONGO_DB_NAME__
   });
 };

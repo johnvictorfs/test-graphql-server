@@ -1,5 +1,8 @@
 import bcrypt from 'bcryptjs';
 import models from './models';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = 'SECRET_TOKEN';
 
 export default {
   Query: {
@@ -21,17 +24,25 @@ export default {
     },
     login: async (_, { username, password }) => {
       const user = await models.User.findOne({ username });
+      const comparison = await bcrypt.compareSync(password, user.password);
 
-      let comparison = null;
-      try {
-        comparison = await bcrypt.compareSync(password, user.password);
-      } catch (error) {
-        return null;
-      }
-      return comparison;
+      if (comparison) return jwt.sign({ id: user._id, username: user.username }, JWT_SECRET);
+      return null;
     },
     deleteUser: async (_, { id }) => {
       await models.User.findByIdAndDelete(id);
+    },
+    updateSelfUser: async(_, args, ctx) => {
+      const auth = ctx ? ctx.request.get('Authorization') : null;
+      if (!auth) return false;
+
+      const decoded = jwt.verify(auth, JWT_SECRET);
+      const result = await models.User.updateOne({ _id: decoded.id }, { $set: args });
+
+      if (result.nModified === 1) {
+        return true;
+      }
+      return false;
     }
   }
-}
+};

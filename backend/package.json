@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development nodemon --delay 3 --exec babel-node src/app.js",
+    "dev": "NODE_ENV=development nodemon --delay 1 --exec babel-node src/app.js",
     "start": "NODE_ENV=development babel-node src/app.js",
     "test": "NODE_ENV=test jest --verbose"
   },

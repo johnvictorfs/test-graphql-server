@@ -5,5 +5,6 @@ import resolvers from './resolvers';
 
 export default new GraphQLServer({
   typeDefs: path.resolve(__dirname, 'schema.graphql'),
-  resolvers
+  resolvers,
+  context: req => ({ ...req })
 });
