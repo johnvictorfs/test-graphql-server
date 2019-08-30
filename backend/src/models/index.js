@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 
 import User from './user';
+
+dotenv.config();
 
 const mongo_uri = global.__MONGO_URI__ ? global.__MONGO_URI__ : process.env.MONGO_URI;
 
