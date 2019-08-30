@@ -3,14 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development nodemon src/app.js",
-    "start": "NODE_ENV=development babel-node src/app.js",
+    "dev": "NODE_ENV=development nodemon",
+    "start": "NODE_ENV=development sucrase-node src/app.ts",
     "test": "NODE_ENV=test jest --verbose",
-    "build": "NODE_ENV=production sucrase ./src -d ./dist --transforms imports"
+    "build": "NODE_ENV=production sucrase ./src -d ./dist --transforms imports",
+    "lint": "tslint --fix ./src/*.ts"
   },
   "dependencies": {
     "@babel/preset-env": "^7.5.5",
+    "@types/bcryptjs": "^2.4.2",
+    "@types/dotenv": "^6.1.1",
     "@types/jest": "^24.0.18",
+    "@types/jsonwebtoken": "^8.3.3",
+    "@types/mongoose": "^5.5.16",
     "babel-polyfill": "^6.26.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.4",
@@ -28,13 +33,15 @@
   },
   "devDependencies": {
     "bili": "^4.8.1",
-    "eslint": "^6.2.2",
     "eslint-plugin-jest": "^22.15.2",
     "jest": "^24.9.0",
     "jest-environment-node": "^24.9.0",
     "mongodb-memory-server": "^5.2.0",
     "nodemon": "^1.19.1",
     "run-time": "^1.2.8",
-    "sucrase": "^3.10.1"
+    "sucrase": "^3.10.1",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.19.0",
+    "typescript": "^3.6.2"
   }
 }

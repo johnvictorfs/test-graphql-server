@@ -1,8 +1,8 @@
 {
   "watch": ["src"],
-  "ext": "js",
+  "ext": "ts",
   "execMap": {
-    "js": "sucrase-node src/app.js"
+    "ts": "sucrase-node src/app.ts"
   },
   "signal": "SIGHUP",
   "env": {

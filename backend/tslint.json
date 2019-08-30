@@ -1,0 +1,28 @@
+{
+  "defaultSeverity": "error",
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest": true
+  },
+  "extends": ["tslint:recommended"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": [true, "spaces", 2],
+    "quotemark": [true, "single"],
+    "trailing-comma": [false],
+    "triple-equals": [true],
+    "no-trailing-whitespace": [true],
+    "arrow-parens": [false],
+    "no-console": [false],
+    "semicolon": [true],
+    "arrow-return-shorthand": [true],
+    "interface-name": [false]
+  }
+}

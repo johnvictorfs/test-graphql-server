@@ -1,20 +1,23 @@
-import { request, GraphQLClient } from 'graphql-request';
+import { GraphQLClient } from 'graphql-request';
+import { GraphQLServer } from 'graphql-yoga';
 import mongoose from 'mongoose';
 
 import models, { connectDb } from '../models';
 import server from '../server';
 
 const port = 5000;
-const host = `http://localhost:${port}`;
+const endpoint = `http://localhost:${port}`;
 
-let testServer;
+let testServer: any;
+let client: GraphQLClient;
 
 beforeAll(async () => {
   /**
    * Start Test GraphQL Server and Mongoose Connection (with a test in-memory Mongo Database)
    */
-  testServer = await server.start({ port }, () => console.log(`Running test server at ${host}`));
+  testServer = await server.start({ port }, () => console.log(`Running test server at ${endpoint}`));
   await connectDb();
+  client = new GraphQLClient(endpoint);
 });
 
 afterAll(async () => {
@@ -25,6 +28,13 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
+beforeEach(async () => {
+  /**
+   * Clear any headers that could affect test results because of previous tests that changed them
+   */
+  client.setHeaders({});
+});
+
 const email = 'test@test.com';
 const username = 'testusername';
 const password = 'testpassword';
@@ -33,14 +43,16 @@ test('Create user', async done => {
   const mutation = `
     mutation {
       createUser(username: "${username}", password: "${password}", email: "${email}") {
-        id
         username
         password
         email
       }
     }
   `;
-  await request(host, mutation);
+  const response = await client.request(mutation);
+  expect(response.createUser.username).toBe(username);
+  expect(response.createUser.email).toBe(email);
+  expect(response.createUser.password).not.toBe(password);
   done();
 });
 
@@ -72,7 +84,7 @@ test('Created user has correct data in API', async done => {
     }
   `;
 
-  const response = await request(host, query);
+  const response = await client.request(query);
 
   expect(response.user.id).toBe(user._id.toString());
   expect(response.user.email).toBe(user.email);
@@ -87,7 +99,7 @@ test('User can login with correct credentials', async done => {
       login(username: "${username}", password: "${password}")
     }
   `;
-  const response = await request(host, mutation);
+  const response = await client.request(mutation);
   expect(response.login).not.toBeNull();
   done();
 });
@@ -98,7 +110,7 @@ test('Authenticated User can edit its own details', async done => {
       login(username: "${username}", password: "${password}")
     }
   `;
-  const loginResponse = await request(host, loginMutation);
+  const loginResponse = await client.request(loginMutation);
   const token = loginResponse.login;
 
   const editedEmail = email + '-edited';
@@ -109,7 +121,6 @@ test('Authenticated User can edit its own details', async done => {
     }
   `;
 
-  const client = new GraphQLClient(host);
   client.setHeader('Authorization', token);
 
   const updateResponse = await client.request(userUpdateMutation, { email: editedEmail });
@@ -134,7 +145,7 @@ test('User can\'t login with incorrect credentials', async done => {
       login(username: "${username}", password: "blablabla")
     }
   `;
-  const response = await request(host, mutation);
+  const response = await client.request(mutation);
   expect(response.login).toBeNull();
   done();
 });
@@ -146,7 +157,7 @@ test('Unauthenticated User can\'t edit its own details', async done => {
     }
   `;
 
-  const response = await request(host, mutation);
+  const response = await client.request(mutation);
   expect(response.updateSelfUser).toBe('false');
   done();
 });
