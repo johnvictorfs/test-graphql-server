@@ -1,5 +1,4 @@
 import { GraphQLClient } from 'graphql-request';
-import { GraphQLServer } from 'graphql-yoga';
 import mongoose from 'mongoose';
 
 import models, { connectDb } from '../models';
@@ -8,7 +7,7 @@ import server from '../server';
 const port = 5000;
 const endpoint = `http://localhost:${port}`;
 
-let testServer: any;
+let testServer: any; // https://github.com/prisma/graphql-yoga/issues/379
 let client: GraphQLClient;
 
 beforeAll(async () => {
@@ -117,7 +116,7 @@ test('Authenticated User can edit its own details', async done => {
 
   const userUpdateMutation = `
     mutation updateUser($email: String!) {
-      updateSelfUser(email: $email)
+      editUserSelf(email: $email)
     }
   `;
 
@@ -125,7 +124,7 @@ test('Authenticated User can edit its own details', async done => {
 
   const updateResponse = await client.request(userUpdateMutation, { email: editedEmail });
 
-  expect(updateResponse.updateSelfUser).toBe('true');
+  expect(updateResponse.editUserSelf).toBe('true');
 
   const userUpdated = await models.User.findOne({ username });
   expect(userUpdated.email).toBe(editedEmail);
@@ -153,11 +152,11 @@ test('User can\'t login with incorrect credentials', async done => {
 test('Unauthenticated User can\'t edit its own details', async done => {
   const mutation = `
     mutation {
-      updateSelfUser(username: "some-random-username")
+      editUserSelf(username: "some-random-username")
     }
   `;
 
   const response = await client.request(mutation);
-  expect(response.updateSelfUser).toBe('false');
+  expect(response.editUserSelf).toBe('false');
   done();
 });

@@ -3,7 +3,9 @@ type User {
     username: String!
     password: String!
     email: String!
+    posts: [Post!]!
 }
+
 
 type Query {
     users: [User!]!
@@ -15,6 +17,6 @@ type Mutation {
     createUser(username: String!, password: String!, email: String!): User
     deleteUser(id: ID!): User
     editUser(id: ID!, username: String, password: String, email: String): User
+    editUserSelf(username: String, email: String): String
     login(username: String!, password: String!): String
-    updateSelfUser(username: String, email: String): String
 }

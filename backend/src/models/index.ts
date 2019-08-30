@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
+import Post from './post';
 import User from './user';
 
 dotenv.config();
@@ -24,4 +25,4 @@ export const connectDb = () => {
   });
 };
 
-export default { User };
+export default { User, Post };

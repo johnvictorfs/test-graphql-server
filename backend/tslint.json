@@ -23,6 +23,8 @@
     "no-console": [false],
     "semicolon": [true],
     "arrow-return-shorthand": [true],
-    "interface-name": [false]
+    "interface-name": [false],
+    "object-literal-sort-keys": [false],
+    "ordered-imports": [false]
   }
 }
