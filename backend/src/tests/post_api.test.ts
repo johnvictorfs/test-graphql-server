@@ -160,4 +160,39 @@ describe('Post', () => {
 
     done();
   });
+
+  test('data appear on users API', async done => {
+    const query = `
+      query {
+        users {
+          username
+          posts {
+            title
+            description
+            content
+            author {
+              username
+            }
+          }
+        }
+      }
+    `;
+    const response = await client.request(query);
+
+    expect(response.users).toHaveLength(1);
+    expect(response.users[0]).toMatchObject({
+      username,
+      posts: [
+        {
+          title,
+          description,
+          content,
+          author: {
+            username
+          }
+        }
+      ]
+    });
+    done();
+  });
 });
