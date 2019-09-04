@@ -7,7 +7,7 @@
     "start": "NODE_ENV=development sucrase-node src/app.ts",
     "test": "NODE_ENV=test jest --verbose",
     "build": "NODE_ENV=production sucrase ./src -d ./dist --transforms imports",
-    "lint": "tslint --fix ./src/*.ts"
+    "lint": "tslint --fix ./src/**/*.ts"
   },
   "dependencies": {
     "@babel/preset-env": "^7.5.5",

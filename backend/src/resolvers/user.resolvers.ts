@@ -3,8 +3,8 @@ import { Context } from 'graphql-yoga/dist/types';
 import jwt from 'jsonwebtoken';
 
 import models from '../models';
-import { IUser } from '../models/user';
-import { IDecodedUser } from './types';
+import { IPost, IUser } from '../types';
+import { getAuthUser, encryptedPassword } from '../helpers';
 
 export default {
   Query: {
@@ -14,9 +14,7 @@ export default {
   },
   Mutation: {
     createUser: async (_: any, { username, password, email }: IUser) => {
-      const salt = await bcrypt.genSaltSync(10);
-      const hash = await bcrypt.hashSync(password, salt);
-
+      const hash = await encryptedPassword(password);
       const newUser = new models.User({ username, password: hash, email });
       const error = await newUser.save();
 
@@ -34,10 +32,9 @@ export default {
       await models.User.findByIdAndDelete(id);
     },
     editUserSelf: async (_: any, user: IUser, ctx: Context) => {
-      const auth = ctx ? ctx.request.get('Authorization') : null;
-      if (!auth) { return false; }
+      const decoded = getAuthUser(ctx);
+      if (!decoded) { return false; }
 
-      const decoded = jwt.verify(auth, process.env.JWT_SECRET) as IDecodedUser;
       const result = await models.User.updateOne({ _id: decoded.id }, { $set: user });
 
       if (result.nModified === 1) {
@@ -45,5 +42,8 @@ export default {
       }
       return false;
     },
+  },
+  Post: {
+    author: (parent: IPost) => models.User.findById(parent.author)
   }
 };

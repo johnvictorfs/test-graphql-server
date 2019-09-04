@@ -1,12 +1,5 @@
-import { Document, model, Schema } from 'mongoose';
-import { IUser } from './user';
-
-export interface IPost extends Document {
-  title: string;
-  description: string;
-  content: string;
-  author: IUser['_id'];
-}
+import { model, Schema } from 'mongoose';
+import { IPost } from '../types';
 
 const postSchema: Schema = new Schema({
   title: {
