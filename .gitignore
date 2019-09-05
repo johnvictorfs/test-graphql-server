@@ -90,3 +90,6 @@ typings/
 # Editor files
 .vscode/
 .idea/
+
+# Production files
+dist/

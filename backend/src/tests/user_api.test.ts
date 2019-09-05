@@ -1,8 +1,10 @@
 import { GraphQLClient } from 'graphql-request';
+import { formatError } from 'apollo-errors';
 import mongoose from 'mongoose';
 
 import models, { connectDb } from '../models';
 import server from '../server';
+import { NotAuthenticatedError, WrongCredentialsError } from '../errors';
 
 const port = 5000;
 const endpoint = `http://localhost:${port}`;
@@ -15,7 +17,7 @@ beforeAll(async () => {
    * Start Test GraphQL Server and Mongoose Connection (with a test in-memory Mongo Database)
    */
   await connectDb();
-  testServer = await server.start({ port }, () => console.log(`Running test server at ${endpoint}`));
+  testServer = await server.start({ port, formatError }, () => console.log(`Running test server at ${endpoint}`));
   client = new GraphQLClient(endpoint);
 });
 
@@ -117,7 +119,10 @@ describe('User', () => {
 
     const userUpdateMutation = `
       mutation updateUser($email: String!) {
-        editUserSelf(email: $email)
+        editUserSelf(email: $email) {
+          username
+          email
+        }
       }
     `;
 
@@ -125,7 +130,10 @@ describe('User', () => {
 
     const updateResponse = await client.request(userUpdateMutation, { email: editedEmail });
 
-    expect(updateResponse.editUserSelf).toBe('true');
+    expect(updateResponse.editUserSelf).toMatchObject({
+      username,
+      email: editedEmail
+    });
 
     const userUpdated = await models.User.findOne({ username });
     expect(userUpdated.email).toBe(editedEmail);
@@ -145,20 +153,31 @@ describe('User', () => {
         login(username: "${username}", password: "blablabla")
       }
     `;
-    const response = await client.request(mutation);
-    expect(response.login).toBeNull();
+    // const response = await client.request(mutation);
+    try {
+      await client.request(mutation);
+    } catch (error) {
+      expect(error.response.errors[0].name).toEqual('WrongCredentialsError');
+    }
+
     done();
   });
 
   test('can\'t edit its own details when unauthenticated', async done => {
     const mutation = `
       mutation {
-        editUserSelf(username: "some-random-username")
+        editUserSelf(username: "some-random-username") {
+          username
+          email
+        }
       }
     `;
+    try {
+      await client.request(mutation);
+    } catch (error) {
+      expect(error.response.errors[0].name).toEqual('NotAuthenticatedError');
+    }
 
-    const response = await client.request(mutation);
-    expect(response.editUserSelf).toBe('false');
     done();
   });
 });

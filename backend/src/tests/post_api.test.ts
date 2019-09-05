@@ -1,4 +1,5 @@
 import { GraphQLClient } from 'graphql-request';
+import { formatError } from 'apollo-errors';
 import mongoose from 'mongoose';
 
 import models, { connectDb } from '../models';
@@ -25,7 +26,7 @@ beforeAll(async () => {
    * Create test account to be used
    */
   await connectDb();
-  testServer = await server.start({ port }, () => console.log(`Running test server at ${endpoint}`));
+  testServer = await server.start({ port, formatError }, () => console.log(`Running test server at ${endpoint}`));
   client = new GraphQLClient(endpoint);
 
   const mutation = `

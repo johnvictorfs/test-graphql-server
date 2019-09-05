@@ -16,6 +16,7 @@
     "@types/jest": "^24.0.18",
     "@types/jsonwebtoken": "^8.3.3",
     "@types/mongoose": "^5.5.16",
+    "apollo-errors": "^1.9.0",
     "babel-polyfill": "^6.26.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.4",

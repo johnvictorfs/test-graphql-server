@@ -1,10 +1,11 @@
-import bcrypt from 'bcryptjs';
 import { Context } from 'graphql-yoga/dist/types';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 import models from '../models';
 import { IPost, IUser } from '../types';
 import { getAuthUser, encryptedPassword } from '../helpers';
+import { WrongCredentialsError, NotAuthenticatedError } from '../errors';
 
 export default {
   Query: {
@@ -23,24 +24,23 @@ export default {
     },
     login: async (_: any, { username, password }: IUser) => {
       const user = await models.User.findOne({ username });
-      const comparison = await bcrypt.compareSync(password, user.password);
+      if (!user) {
+        throw new WrongCredentialsError();
+      }
+      const comparison = bcrypt.compareSync(password, user.password);
 
       if (comparison) { return jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET); }
-      return null;
+      throw new WrongCredentialsError();
     },
     deleteUser: async (_: any, { id }: IUser) => {
       await models.User.findByIdAndDelete(id);
     },
     editUserSelf: async (_: any, user: IUser, ctx: Context) => {
       const decoded = getAuthUser(ctx);
-      if (!decoded) { return false; }
+      if (!decoded) { throw new NotAuthenticatedError(); }
 
-      const result = await models.User.updateOne({ _id: decoded.id }, { $set: user });
-
-      if (result.nModified === 1) {
-        return true;
-      }
-      return false;
+      const result = await models.User.findOneAndUpdate({ _id: decoded.id }, { $set: user }, { new: true });
+      if (result) { return result; } else { throw new NotAuthenticatedError(); }
     },
   },
   Post: {

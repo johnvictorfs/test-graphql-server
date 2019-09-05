@@ -18,11 +18,14 @@ declare global {
 const mongoUri = global.TEST_MONGO_URI ? global.TEST_MONGO_URI : process.env.MONGO_URI;
 
 export const connectDb = () => {
-  return mongoose.connect(mongoUri, {
+  const settings = {
     dbName: global.MONGO_DB_NAME,
     useCreateIndex: true,
-    useNewUrlParser: true
-  });
+    useNewUrlParser: true,
+    useFindAndModify: false
+  };
+
+  return mongoose.connect(mongoUri, settings);
 };
 
 export default { User, Post };
