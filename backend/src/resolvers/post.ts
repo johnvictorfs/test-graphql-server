@@ -7,7 +7,7 @@ import { getAuthUser } from '../helpers';
 export default {
   Query: {
     posts: () => models.Post.find(),
-    post: (_: any, { id }: IPost['_id']) => models.Post.findById(id),
+    post: (_: any, { id }: IPost['_id']) =>  models.Post.findById(id),
     postCount: () => models.Post.countDocuments()
   },
   Mutation: {

@@ -58,6 +58,51 @@ describe('User', () => {
     done();
   });
 
+  test('cant\'t use already existing username', async done => {
+    const mutation = `
+      mutation {
+        createUser(username: "${username}", password: "${password + 'different'}", email: "${email + 'different'}") {
+          username
+          password
+          email
+        }
+      }
+    `;
+    try {
+      await client.request(mutation);
+    } catch (error) {
+      expect(error.response.errors[0].code).toEqual(11000);
+      expect(error.response.errors[0].name).toEqual('MongoError');
+    }
+
+    done();
+  });
+
+  test('cant\'t use already existing email', async done => {
+    const mutation = `
+      mutation {
+        createUser(username: "${username + 'different'}", password: "${password + 'different'}", email: "${email}") {
+          username
+          password
+          email
+        }
+      }
+    `;
+    try {
+      await client.request(mutation);
+    } catch (error) {
+      console.log(Object.keys(error.response.errors[0]));
+      console.log(error.response.errors[0]);
+      // { message: 'E11000 duplicate key error dup key: { : "test@test.com" }',
+      // locations: [ { line: 3, column: 9 } ],
+      // path: [ 'createUser' ] }
+      expect(error.response.errors[0].code).toEqual(11000);
+      expect(error.response.errors[0].name).toEqual('MongoError');
+    }
+
+    done();
+  });
+
   test('was added to database', async done => {
     const users = await models.User.find({ username });
     expect(users).toHaveLength(1);
